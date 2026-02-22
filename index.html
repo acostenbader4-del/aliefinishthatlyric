@@ -201,6 +201,13 @@ hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:22px 0;}
 .modal-title span{color:var(--accent);}
 .modal-sub{color:var(--muted);font-size:13px;margin-bottom:24px;}
 
+.pool-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.pool-tab{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border2);
+  background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;}
+.pool-tab:hover{color:var(--text);border-color:rgba(255,110,180,.3);}
+.pool-tab.active{background:var(--accent);color:#000;border-color:var(--accent);}
+
 .answered-bar{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;}
 .answered-txt{font-size:12px;color:var(--muted);}
 .answered-txt strong{color:var(--accent3);}
@@ -383,22 +390,32 @@ hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:22px 0;}
   <div class="modal">
     <button class="modal-close" id="modal-pool-close">×</button>
     <div class="modal-title">Song <span>Pool</span></div>
-    <div class="modal-sub">Add songs once — available for every game</div>
-    <div class="pool-grid" id="pool-song-list">
-      <span class="chip-empty">No songs yet. Add one below!</span>
+    <div class="modal-sub">Manage your song library</div>
+
+    <!-- TABS -->
+    <div class="pool-tabs">
+      <button class="pool-tab active" id="tab-view">🎵 View Songs</button>
+      <button class="pool-tab" id="tab-add">➕ Add Song</button>
     </div>
-    <hr>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:16px">
-      Add New <span style="color:var(--accent)">Song</span>
+
+    <!-- VIEW SONGS PANEL -->
+    <div id="pool-panel-view">
+      <div class="pool-grid" id="pool-song-list">
+        <span class="chip-empty">Loading…</span>
+      </div>
     </div>
-    <label>Song Title</label>
-    <input type="text" id="pool-title" placeholder="e.g. Bohemian Rhapsody">
-    <label>Lyrics (one line per phrase — 8+ lines recommended)</label>
-    <textarea id="pool-lyrics" placeholder="Is this the real life?&#10;Is this just fantasy?&#10;Caught in a landslide&#10;No escape from reality&#10;Open your eyes&#10;Look up to the skies and see&#10;I'm just a poor boy&#10;I need no sympathy"></textarea>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="btn-save-song">💾 Save Song</button>
+
+    <!-- ADD SONG PANEL -->
+    <div id="pool-panel-add" style="display:none">
+      <label>Song Title</label>
+      <input type="text" id="pool-title" placeholder="e.g. Bohemian Rhapsody">
+      <label>Lyrics (one line per phrase — 8+ lines recommended)</label>
+      <textarea id="pool-lyrics" placeholder="Is this the real life?&#10;Is this just fantasy?&#10;Caught in a landslide&#10;No escape from reality&#10;Open your eyes&#10;Look up to the skies and see&#10;I'm just a poor boy&#10;I need no sympathy"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-save-song">💾 Save Song</button>
+      </div>
+      <div class="status error" id="pool-error" style="display:none;margin-top:10px"></div>
     </div>
-    <div class="status error" id="pool-error" style="display:none;margin-top:10px"></div>
   </div>
 </div>
 
@@ -468,18 +485,35 @@ document.getElementById('btn-back-join').addEventListener('click',  () => show('
 // ══ SONG POOL MODAL ══
 document.getElementById('btn-open-pool').addEventListener('click', () => {
   document.getElementById('modal-pool').classList.add('open');
+  // Always open on the View tab
+  document.getElementById('tab-view').classList.add('active');
+  document.getElementById('tab-add').classList.remove('active');
+  document.getElementById('pool-panel-view').style.display = 'block';
+  document.getElementById('pool-panel-add').style.display = 'none';
   loadPoolSongs();
 });
 document.getElementById('modal-pool-close').addEventListener('click', () => {
   document.getElementById('modal-pool').classList.remove('open');
-  loadSongsIntoSelect();
 });
 document.getElementById('modal-pool').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-pool')) {
+  if (e.target === document.getElementById('modal-pool'))
     document.getElementById('modal-pool').classList.remove('open');
-    loadSongsIntoSelect();
-  }
 });
+
+// TABS
+document.getElementById('tab-view').addEventListener('click', () => {
+  document.getElementById('tab-view').classList.add('active');
+  document.getElementById('tab-add').classList.remove('active');
+  document.getElementById('pool-panel-view').style.display = 'block';
+  document.getElementById('pool-panel-add').style.display = 'none';
+});
+document.getElementById('tab-add').addEventListener('click', () => {
+  document.getElementById('tab-add').classList.add('active');
+  document.getElementById('tab-view').classList.remove('active');
+  document.getElementById('pool-panel-add').style.display = 'block';
+  document.getElementById('pool-panel-view').style.display = 'none';
+});
+
 document.getElementById('btn-save-song').addEventListener('click', saveSong);
 
 async function saveSong() {
@@ -495,6 +529,11 @@ async function saveSong() {
     await push(ref(db, 'songPool'), { title, lines });
     document.getElementById('pool-title').value  = '';
     document.getElementById('pool-lyrics').value = '';
+    // Switch back to view tab to see the newly added song
+    document.getElementById('tab-view').classList.add('active');
+    document.getElementById('tab-add').classList.remove('active');
+    document.getElementById('pool-panel-view').style.display = 'block';
+    document.getElementById('pool-panel-add').style.display = 'none';
     loadPoolSongs();
   } catch(e) {
     errEl.textContent = 'Save failed: ' + e.message;
