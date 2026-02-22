@@ -514,23 +514,35 @@ async function loadPoolSongs() {
     const songs = snap.val();
     container.innerHTML = '';
     Object.entries(songs).forEach(([id, s]) => {
+      if (!s || !s.title || !s.lines) return;
       const div = document.createElement('div');
       div.className = 'song-item';
       div.innerHTML = `
         <div class="song-item-info">
           <div class="song-item-title">🎵 ${esc(s.title)}</div>
-          <div class="song-item-count">${s.lines.length} lines · ${buildQuestions(s.lines).length} questions</div>
+          <div class="song-item-count">${s.lines.length} lines · ${buildRounds({[id]:s},[id]).length} questions possible</div>
         </div>
         <button class="btn btn-ghost btn-sm del-btn">🗑 Delete</button>
       `;
       div.querySelector('.del-btn').addEventListener('click', async () => {
+        div.style.opacity = '0.4';
         await remove(ref(db, 'songPool/' + id));
         loadPoolSongs();
       });
       container.appendChild(div);
     });
+    if (container.children.length === 0) {
+      container.innerHTML = '<span class="chip-empty">No songs yet. Add one below!</span>';
+    }
   } catch(e) {
-    container.innerHTML = '<span class="chip-empty" style="color:var(--accent2)">Error loading songs.</span>';
+    container.innerHTML = `
+      <div class="status error">
+        <strong>Could not load songs.</strong><br>
+        ${esc(e.message)}<br><br>
+        <span style="font-size:12px">Make sure your Firebase Realtime Database rules allow read/write.<br>
+        In Firebase Console → Realtime Database → Rules, set:<br>
+        <code style="background:rgba(0,0,0,.3);padding:4px 8px;border-radius:4px;display:inline-block;margin-top:6px">{ "rules": { ".read": true, ".write": true } }</code></span>
+      </div>`;
   }
 }
 
