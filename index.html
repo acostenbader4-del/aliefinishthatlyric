@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alie's Finish That Lyric 🎀</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f080f; --surface:#1a1018; --surface2:#261520; --surface3:#321a28;
+  --accent:#ff6eb4; --accent2:#ff4d8d; --accent3:#ffb3d9;
+  --text:#fce8f3; --muted:#9a7089;
+  --border:rgba(255,110,180,0.18); --border2:rgba(255,255,255,0.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;
+  background:radial-gradient(ellipse at 25% 15%,rgba(255,110,180,.07) 0%,transparent 45%),
+             radial-gradient(ellipse at 75% 85%,rgba(255,100,150,.05) 0%,transparent 45%);
+  pointer-events:none;z-index:0;}
+
+/* BANNER */
+#fb-banner{position:fixed;top:0;left:0;right:0;z-index:9999;padding:11px 20px;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:13px;font-weight:500;transition:background .4s,border-color .4s,color .4s;
+  background:var(--surface2);border-bottom:1px solid var(--border);color:var(--muted);}
+#fb-banner.connected{background:rgba(255,179,217,.08);border-color:rgba(255,179,217,.25);color:var(--accent3);}
+#fb-banner.error{background:rgba(255,77,141,.08);border-color:rgba(255,77,141,.25);color:var(--accent2);}
+#fb-banner .dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0;}
+#fb-banner.connecting .dot{animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+#fb-banner-close{position:absolute;right:16px;background:none;border:none;color:currentColor;
+  cursor:pointer;font-size:20px;line-height:1;opacity:.6;transition:opacity .2s;}
+#fb-banner-close:hover{opacity:1;}
+
+/* LAYOUT */
+.container{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:88px 24px 60px;}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;animation:rise .35s ease;}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* LOGO */
+.logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,11vw,96px);
+  letter-spacing:3px;line-height:.95;margin-bottom:10px;}
+.logo span{color:var(--accent);}
+.tagline{color:var(--muted);font-size:13px;letter-spacing:3.5px;text-transform:uppercase;margin-bottom:52px;}
+
+/* LANDING CARDS */
+.landing-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:560px;}
+@media(max-width:500px){.landing-cards{grid-template-columns:1fr;}}
+.card{background:var(--surface);border:1px solid var(--border2);border-radius:18px;
+  padding:30px 26px;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;
+  position:relative;overflow:hidden;}
+.card::after{content:'';position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .25s;}
+.card.host::after{background:radial-gradient(ellipse at top left,rgba(255,110,180,.12) 0%,transparent 60%);}
+.card.player::after{background:radial-gradient(ellipse at top left,rgba(255,179,217,.1) 0%,transparent 60%);}
+.card:hover{transform:translateY(-5px);}
+.card:hover::after{opacity:1;}
+.card.host:hover{border-color:rgba(255,110,180,.5);box-shadow:0 8px 32px rgba(255,110,180,.15);}
+.card.player:hover{border-color:rgba(255,179,217,.4);box-shadow:0 8px 32px rgba(255,179,217,.12);}
+.card-icon{font-size:34px;margin-bottom:14px;display:block;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:6px;}
+.card.host .card-title{color:var(--accent);}
+.card.player .card-title{color:var(--accent3);}
+.card-desc{color:var(--muted);font-size:13px;line-height:1.55;}
+
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:36px;max-width:640px;}
+.panel-title{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1px;margin-bottom:4px;}
+.panel-title span{color:var(--accent);}
+.panel-sub{color:var(--muted);font-size:13px;margin-bottom:28px;line-height:1.5;}
+
+/* INPUTS */
+label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:7px;}
+input[type=text],textarea,select{width:100%;background:var(--surface2);border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;
+  outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:20px;appearance:none;}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(240,192,64,.08);}
+select{cursor:pointer;}
+textarea{height:160px;resize:vertical;line-height:1.65;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:12px 26px;border-radius:10px;border:none;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;
+  transition:all .18s;letter-spacing:.3px;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-primary:hover:not(:disabled){background:#ff8ec4;transform:translateY(-2px);box-shadow:0 5px 20px rgba(255,110,180,.4);}
+.btn-green{background:var(--accent3);color:#000;}
+.btn-green:hover:not(:disabled){background:#ffc8e6;transform:translateY(-2px);box-shadow:0 5px 20px rgba(255,179,217,.4);}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.1);}
+.btn-ghost:hover:not(:disabled){color:var(--text);border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.04);}
+.btn-danger{background:var(--accent2);color:#fff;}
+.btn-danger:hover:not(:disabled){background:#ff6fa8;transform:translateY(-2px);}
+.btn-purple{background:#a78bfa;color:#000;}
+.btn-purple:hover:not(:disabled){background:#c4b5fd;transform:translateY(-2px);}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+.btn-sm{padding:8px 14px;font-size:13px;}
+
+/* BACK LINK */
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;cursor:pointer;
+  margin-bottom:22px;transition:color .2s;background:none;border:none;font-family:'DM Sans',sans-serif;}
+.back-link:hover{color:var(--text);}
+
+/* ROOM CODE */
+.room-code-box{background:var(--surface2);border:2px solid var(--accent);border-radius:14px;
+  padding:20px 26px;margin:18px 0;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;}
+.rcode-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.rcode-value{font-family:'Bebas Neue',sans-serif;font-size:54px;color:var(--accent);letter-spacing:8px;line-height:1;}
+#qr-code{border-radius:8px;background:white;padding:6px;display:block;}
+#qr-code img, #qr-code canvas{border-radius:4px;display:block;}
+
+/* CHIP LIST */
+.section-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:10px;}
+.chip-list{display:flex;flex-wrap:wrap;gap:8px;min-height:38px;}
+.chip{background:var(--surface2);border:1px solid var(--border2);border-radius:30px;padding:7px 15px;
+  font-size:13px;display:flex;align-items:center;gap:7px;animation:popIn .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{scale:0;opacity:0}to{scale:1;opacity:1}}
+.chip-score{color:var(--accent);font-weight:600;font-size:11px;}
+.chip-empty{color:var(--muted);font-style:italic;font-size:13px;}
+
+/* LYRIC BOX */
+.lyric-box{background:var(--surface2);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;
+  padding:18px 22px;margin:16px 0;font-size:17px;line-height:1.65;
+  font-style:italic;white-space:pre-line;color:rgba(240,238,234,.88);}
+
+/* ANSWER BOX */
+.answer-box{background:rgba(240,192,64,.06);border:1px solid rgba(240,192,64,.28);
+  border-radius:12px;padding:14px 18px;margin:10px 0;}
+.answer-box-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:5px;}
+.answer-box-text{font-size:17px;font-weight:500;}
+
+/* CHOICES */
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:18px 0;}
+@media(max-width:460px){.choices-grid{grid-template-columns:1fr;}}
+.choice-btn{background:var(--surface2);border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  padding:15px 16px;text-align:left;color:var(--text);font-family:'DM Sans',sans-serif;
+  font-size:13.5px;cursor:pointer;transition:all .18s;line-height:1.45;
+  display:flex;align-items:flex-start;}
+.choice-btn:hover:not(:disabled){border-color:rgba(255,110,180,.5);background:rgba(255,110,180,.08);transform:translateY(-2px);}
+.choice-btn.correct{border-color:var(--accent3)!important;background:rgba(255,179,217,.14)!important;}
+.choice-btn.wrong{border-color:var(--accent2)!important;background:rgba(255,77,141,.09)!important;opacity:.7;}
+.choice-btn.selected{border-color:var(--accent)!important;background:rgba(255,110,180,.1)!important;}
+.choice-btn:disabled{cursor:default;}
+.choice-ltr{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;
+  border-radius:6px;background:rgba(255,255,255,.06);font-size:11px;font-weight:700;color:var(--muted);
+  margin-right:10px;flex-shrink:0;margin-top:1px;}
+.vote-count{margin-left:auto;color:var(--muted);font-size:11px;white-space:nowrap;padding-left:8px;}
+
+/* PROGRESS */
+.q-meta{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap;}
+.q-badge{background:var(--accent);color:#000;border-radius:6px;padding:3px 10px;font-weight:700;font-size:11px;}
+.q-song{color:var(--muted);font-size:12px;margin-left:auto;}
+.progress-bar{height:3px;background:var(--surface2);border-radius:2px;margin:12px 0;overflow:hidden;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s ease;}
+
+/* STATUS */
+.status{padding:11px 15px;border-radius:10px;font-size:13.5px;margin:10px 0;line-height:1.45;}
+.status.wait{background:rgba(255,110,180,.07);border:1px solid rgba(255,110,180,.22);color:var(--accent);}
+.status.success{background:rgba(255,179,217,.09);border:1px solid rgba(255,179,217,.25);color:var(--accent3);}
+.status.error{background:rgba(255,77,141,.09);border:1px solid rgba(255,77,141,.25);color:var(--accent2);}
+.status.info{background:rgba(255,150,200,.09);border:1px solid rgba(255,150,200,.22);color:#ffb0d8;}
+
+/* SCOREBOARD */
+.scoreboard{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;margin-top:18px;}
+.score-row{display:flex;align-items:center;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.04);}
+.score-row:last-child{border-bottom:none;}
+.score-rank{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--muted);width:34px;flex-shrink:0;}
+.score-rank.gold{color:var(--accent);}
+.score-name{flex:1;font-size:14px;}
+.score-pts{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent);}
+
+/* SONG POOL */
+.pool-grid{display:grid;gap:10px;margin:16px 0;}
+.song-item{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;transition:border-color .2s;}
+.song-item:hover{border-color:rgba(255,255,255,.15);}
+.song-item-info{flex:1;min-width:0;}
+.song-item-title{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.song-item-count{font-size:11px;color:var(--muted);margin-top:2px;}
+
+hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:22px 0;}
+.small-text{font-size:12px;color:var(--muted);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;
+  display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;animation:fadeModal .2s ease;}
+@keyframes fadeModal{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px;
+  width:100%;max-width:540px;position:relative;animation:riseModal .25s ease;
+  max-height:90vh;overflow-y:auto;}
+@keyframes riseModal{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);
+  font-size:22px;cursor:pointer;transition:color .2s;}
+.modal-close:hover{color:var(--text);}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;margin-bottom:4px;}
+.modal-title span{color:var(--accent);}
+.modal-sub{color:var(--muted);font-size:13px;margin-bottom:24px;}
+
+.answered-bar{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;}
+.answered-txt{font-size:12px;color:var(--muted);}
+.answered-txt strong{color:var(--accent3);}
+</style>
+</head>
+<body>
+
+<div id="fb-banner" class="connecting">
+  <div class="dot"></div>
+  <span id="fb-banner-text">Connecting to Firebase…</span>
+  <button id="fb-banner-close">×</button>
+</div>
+
+<div class="container">
+
+  <!-- LANDING -->
+  <div id="screen-landing" class="screen active">
+    <div class="logo">Alie's<br>Finish<span>That</span><br>Lyric</div>
+    <p class="tagline">The ultimate lyric guessing game</p>
+    <div class="landing-cards">
+      <div class="card host" id="btn-go-host">
+        <span class="card-icon">🎤</span>
+        <div class="card-title">Host</div>
+        <div class="card-desc">Create a room, pick a song, and run the game</div>
+      </div>
+      <div class="card player" id="btn-go-player">
+        <span class="card-icon">🎧</span>
+        <div class="card-title">Join</div>
+        <div class="card-desc">Enter a room code and compete with others</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOST SETUP -->
+  <div id="screen-host-setup" class="screen">
+    <button class="back-link" id="btn-back-setup">← Back</button>
+    <div class="panel">
+      <div class="panel-title">Host <span>Setup</span></div>
+      <div class="panel-sub">A song will be randomly picked from your pool when you create the room</div>
+      <div id="song-preview" style="display:none">
+        <div class="status info" id="song-preview-text"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-create-room">🎲 Create Room</button>
+        <button class="btn btn-purple"  id="btn-open-pool">🎵 Manage Song Pool</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOST LOBBY -->
+  <div id="screen-host-lobby" class="screen">
+    <div class="panel" style="max-width:680px">
+      <div class="panel-title">Game <span>Lobby</span></div>
+      <div class="panel-sub" id="lobby-song-name"></div>
+      <div class="room-code-box">
+        <div>
+          <div class="rcode-label">Room Code</div>
+          <div class="rcode-value" id="room-code-display">----</div>
+          <div class="small-text" style="margin-top:6px">Share this with players</div>
+        </div>
+        <div id="qr-code"></div>
+      </div>
+      <div class="section-label" style="margin-top:20px">Players (<span id="player-count">0</span>)</div>
+      <div class="chip-list" id="players-chip-list"><span class="chip-empty">Waiting for players…</span></div>
+      <hr>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-start-game" disabled>▶ Start Game</button>
+        <button class="btn btn-ghost"   id="btn-end-lobby">✕ End Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOST QUESTION -->
+  <div id="screen-host-question" class="screen">
+    <div class="panel" style="max-width:720px">
+      <div class="q-meta">
+        <span class="q-badge" id="hq-num">Round 1</span>
+        <span style="color:var(--muted);font-size:12px">of <span id="hq-total">?</span> rounds</span>
+        <span class="q-song" id="hq-song"></span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="hq-progress"></div></div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:6px">What's the next line?</div>
+      <div class="lyric-box" id="hq-prompt"></div>
+      <div class="answer-box">
+        <div class="answer-box-label">✓ Correct Answer (only you can see this)</div>
+        <div class="answer-box-text" id="hq-correct"></div>
+      </div>
+      <div class="answered-bar">
+        <span class="answered-txt">Answered: <strong id="hq-answered">0</strong> / <span id="hq-total-players">0</span></span>
+      </div>
+      <div id="hq-reveal-section" style="display:none">
+        <hr>
+        <div class="section-label">Results</div>
+        <div class="choices-grid" id="hq-choices"></div>
+      </div>
+      <hr>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-reveal">👁 Reveal Answers</button>
+        <button class="btn btn-green"   id="btn-next" disabled>Next →</button>
+        <button class="btn btn-ghost"   id="btn-end-question">End Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOST FINAL -->
+  <div id="screen-host-final" class="screen">
+    <div class="panel" style="max-width:500px">
+      <div class="panel-title">Final <span>Scores</span> 🏆</div>
+      <div class="panel-sub">Game over — here's how everyone did!</div>
+      <div class="scoreboard" id="host-final-scoreboard"></div>
+      <div class="btn-row" style="margin-top:24px">
+        <button class="btn btn-primary" id="btn-play-again">🔄 Play Again</button>
+        <button class="btn btn-ghost"   id="btn-final-home">Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAYER JOIN -->
+  <div id="screen-player-join" class="screen">
+    <button class="back-link" id="btn-back-join">← Back</button>
+    <div class="panel">
+      <div class="panel-title">Join <span>Game</span></div>
+      <div class="panel-sub">Enter the room code shown on the host's screen</div>
+      <label>Room Code</label>
+      <input type="text" id="join-code" placeholder="ABCD" maxlength="4"
+        style="text-transform:uppercase;font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:8px;text-align:center">
+      <label>Your Nickname</label>
+      <input type="text" id="join-nickname" placeholder="e.g. LyricLegend" maxlength="20">
+      <div class="btn-row">
+        <button class="btn btn-green" id="btn-join-room">🎵 Join Room</button>
+      </div>
+      <div class="status error" id="join-error" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- PLAYER WAITING -->
+  <div id="screen-player-waiting" class="screen">
+    <div class="panel">
+      <div class="panel-title">You're <span>In!</span> 🎉</div>
+      <div class="panel-sub" id="player-welcome-msg"></div>
+      <div class="status wait">⏳ Waiting for the host to start the game…</div>
+      <div style="margin-top:18px">
+        <div class="section-label">In the lobby</div>
+        <div class="chip-list" id="player-lobby-chips"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAYER QUESTION -->
+  <div id="screen-player-question" class="screen">
+    <div class="panel" style="max-width:600px">
+      <div class="q-meta">
+        <span class="q-badge" id="pq-num">Round 1</span>
+        <span class="q-song" id="pq-song"></span>
+      </div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:6px">What's the next line?</div>
+      <div class="lyric-box" id="pq-prompt"></div>
+      <div class="choices-grid" id="pq-choices"></div>
+      <div id="pq-status" style="display:none"></div>
+      <div id="pq-score" style="font-size:12px;color:var(--muted);margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- PLAYER FINAL -->
+  <div id="screen-player-final" class="screen">
+    <div class="panel" style="max-width:500px">
+      <div class="panel-title">Game <span>Over!</span> 🎵</div>
+      <div class="panel-sub" id="player-final-msg"></div>
+      <div class="scoreboard" id="player-final-scoreboard"></div>
+      <div class="btn-row" style="margin-top:24px">
+        <button class="btn btn-ghost" id="btn-player-home">Home</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SONG POOL MODAL -->
+<div class="modal-overlay" id="modal-pool">
+  <div class="modal">
+    <button class="modal-close" id="modal-pool-close">×</button>
+    <div class="modal-title">Song <span>Pool</span></div>
+    <div class="modal-sub">Add songs once — available for every game</div>
+    <div class="pool-grid" id="pool-song-list">
+      <span class="chip-empty">No songs yet. Add one below!</span>
+    </div>
+    <hr>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:16px">
+      Add New <span style="color:var(--accent)">Song</span>
+    </div>
+    <label>Song Title</label>
+    <input type="text" id="pool-title" placeholder="e.g. Bohemian Rhapsody">
+    <label>Lyrics (one line per phrase — 8+ lines recommended)</label>
+    <textarea id="pool-lyrics" placeholder="Is this the real life?&#10;Is this just fantasy?&#10;Caught in a landslide&#10;No escape from reality&#10;Open your eyes&#10;Look up to the skies and see&#10;I'm just a poor boy&#10;I need no sympathy"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-save-song">💾 Save Song</button>
+    </div>
+    <div class="status error" id="pool-error" style="display:none;margin-top:10px"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, push, onValue, update, remove }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyCP1TrBa7I_uf1ResqBedplF6OWJE6H7pM",
+  authDomain: "finishthatlyricalie.firebaseapp.com",
+  projectId: "finishthatlyricalie",
+  databaseURL: "https://finishthatlyricalie-default-rtdb.firebaseio.com",
+  storageBucket: "finishthatlyricalie.firebasestorage.app",
+  messagingSenderId: "153327415177",
+  appId: "1:153327415177:web:423082b6c12fe069163b58",
+  measurementId: "G-9NW77PS7EM"
+};
+
+// INIT
+let db;
+const banner     = document.getElementById('fb-banner');
+const bannerText = document.getElementById('fb-banner-text');
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+  banner.className = 'connected';
+  bannerText.textContent = '✓ Connected to Firebase';
+  setTimeout(() => { banner.style.display = 'none'; }, 3500);
+} catch(e) {
+  banner.className = 'error';
+  bannerText.textContent = '✗ Firebase error: ' + e.message;
+}
+document.getElementById('fb-banner-close').addEventListener('click', () => { banner.style.display = 'none'; });
+
+// SCREEN HELPER
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// STATE
+let currentRoomCode  = null;
+let questions        = [];
+let currentQIdx      = 0;
+let myPlayerId       = null;
+let myPlayerRoomCode = null;
+let myScore          = 0;
+let playerCurrentQ   = -1;
+let roomUnsubscribe  = null;
+let answersUnsubscribe = null;
+
+// ══ LANDING ══
+document.getElementById('btn-go-host').addEventListener('click', () => {
+  document.getElementById('song-preview').style.display = 'none';
+  show('screen-host-setup');
+});
+document.getElementById('btn-go-player').addEventListener('click', () => show('screen-player-join'));
+
+// ══ BACK BUTTONS ══
+document.getElementById('btn-back-setup').addEventListener('click', () => show('screen-landing'));
+document.getElementById('btn-back-join').addEventListener('click',  () => show('screen-landing'));
+
+// ══ SONG POOL MODAL ══
+document.getElementById('btn-open-pool').addEventListener('click', () => {
+  document.getElementById('modal-pool').classList.add('open');
+  loadPoolSongs();
+});
+document.getElementById('modal-pool-close').addEventListener('click', () => {
+  document.getElementById('modal-pool').classList.remove('open');
+  loadSongsIntoSelect();
+});
+document.getElementById('modal-pool').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-pool')) {
+    document.getElementById('modal-pool').classList.remove('open');
+    loadSongsIntoSelect();
+  }
+});
+document.getElementById('btn-save-song').addEventListener('click', saveSong);
+
+async function saveSong() {
+  const title  = document.getElementById('pool-title').value.trim();
+  const raw    = document.getElementById('pool-lyrics').value.trim();
+  const errEl  = document.getElementById('pool-error');
+  errEl.style.display = 'none';
+  if (!title) { errEl.textContent = 'Please enter a song title.'; errEl.style.display = 'block'; return; }
+  if (!raw)   { errEl.textContent = 'Please paste in the lyrics.'; errEl.style.display = 'block'; return; }
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length < 6) { errEl.textContent = 'Need at least 6 lyric lines.'; errEl.style.display = 'block'; return; }
+  try {
+    await push(ref(db, 'songPool'), { title, lines });
+    document.getElementById('pool-title').value  = '';
+    document.getElementById('pool-lyrics').value = '';
+    loadPoolSongs();
+  } catch(e) {
+    errEl.textContent = 'Save failed: ' + e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+async function loadPoolSongs() {
+  const container = document.getElementById('pool-song-list');
+  container.innerHTML = '<span class="chip-empty">Loading…</span>';
+  try {
+    const snap = await get(ref(db, 'songPool'));
+    if (!snap.exists()) {
+      container.innerHTML = '<span class="chip-empty">No songs yet. Add one below!</span>';
+      return;
+    }
+    const songs = snap.val();
+    container.innerHTML = '';
+    Object.entries(songs).forEach(([id, s]) => {
+      const div = document.createElement('div');
+      div.className = 'song-item';
+      div.innerHTML = `
+        <div class="song-item-info">
+          <div class="song-item-title">🎵 ${esc(s.title)}</div>
+          <div class="song-item-count">${s.lines.length} lines · ${buildQuestions(s.lines).length} questions</div>
+        </div>
+        <button class="btn btn-ghost btn-sm del-btn">🗑 Delete</button>
+      `;
+      div.querySelector('.del-btn').addEventListener('click', async () => {
+        await remove(ref(db, 'songPool/' + id));
+        loadPoolSongs();
+      });
+      container.appendChild(div);
+    });
+  } catch(e) {
+    container.innerHTML = '<span class="chip-empty" style="color:var(--accent2)">Error loading songs.</span>';
+  }
+}
+
+
+// ══ CREATE ROOM ══
+document.getElementById('btn-create-room').addEventListener('click', createRoom);
+
+async function createRoom() {
+  const preview    = document.getElementById('song-preview');
+  const previewTxt = document.getElementById('song-preview-text');
+  preview.style.display = 'none';
+
+  let snap;
+  try { snap = await get(ref(db, 'songPool')); }
+  catch(e) { alert('Firebase error: ' + e.message); return; }
+
+  if (!snap.exists()) {
+    alert('No songs in the pool yet! Add some via "Manage Song Pool" first.');
+    return;
+  }
+
+  const songs = snap.val();
+  const keys  = Object.keys(songs);
+
+  // Build one question per song, each from a random spot in that song
+  questions = buildRounds(songs, keys);
+  if (questions.length < 1) { alert('Not enough lyric lines in the pool. Add more lines to your songs.'); return; }
+
+  previewTxt.textContent = `🎲 ${questions.length} rounds ready — a different song each round!`;
+  preview.style.display = 'block';
+
+  const code = makeCode();
+  currentRoomCode = code;
+  currentQIdx     = 0;
+
+  try {
+    await set(ref(db, 'rooms/' + code), {
+      questions, status: 'lobby', currentQuestion: 0, players: {}
+    });
+  } catch(e) { alert('Could not create room: ' + e.message); return; }
+
+  document.getElementById('room-code-display').textContent = code;
+  document.getElementById('lobby-song-name').textContent   = `🎵 ${questions.length} rounds · different song each round`;
+  drawQR(code);
+  attachRoomListener(code);
+  show('screen-host-lobby');
+}
+
+function makeCode() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:4}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
+
+// ══ BUILD ROUNDS — one question per song, random position, 2-line prompt ══
+function buildRounds(songs, keys) {
+  const qs = [];
+  // Shuffle the song order so rounds are in a random sequence
+  const shuffledKeys = shuffle(keys);
+  for (const key of shuffledKeys) {
+    const song  = songs[key];
+    const lines = song.lines;
+    if (!lines || lines.length < 4) continue; // need at least 4 lines for wrongs
+
+    // Pick a random starting position where we have line[i], line[i+1] as prompt and line[i+2] as answer
+    const validStarts = [];
+    for (let i = 0; i <= lines.length - 3; i++) validStarts.push(i);
+    if (validStarts.length === 0) continue;
+
+    const i       = validStarts[Math.floor(Math.random() * validStarts.length)];
+    const prompt  = lines[i] + '\n' + lines[i + 1];
+    const correct = lines[i + 2];
+
+    // Wrong answers: other lines from the same song (not the correct one, not the prompt lines)
+    const pool   = lines.filter((l, idx) => idx !== i && idx !== i+1 && idx !== i+2 && l !== correct);
+    if (pool.length < 3) continue;
+    const wrongs  = shuffle(pool).slice(0, 3);
+    const choices = shuffle([correct, ...wrongs]);
+
+    qs.push({ songTitle: song.title, prompt, correct, choices });
+  }
+  return qs;
+}
+function shuffle(a) { return [...a].sort(() => Math.random() - 0.5); }
+
+// ══ QR CODE ══
+let qrInstance = null;
+function drawQR(code) {
+  const el = document.getElementById('qr-code');
+  el.innerHTML = '';
+  const joinUrl = window.location.href.split('?')[0] + '?join=' + code;
+  qrInstance = new QRCode(el, {
+    text: joinUrl,
+    width: 108,
+    height: 108,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+}
+
+// ══ ROOM LISTENER ══
+function attachRoomListener(code) {
+  if (roomUnsubscribe) roomUnsubscribe();
+  roomUnsubscribe = onValue(ref(db, 'rooms/' + code), snap => {
+    if (!snap.exists()) return;
+    const data    = snap.val();
+    const players = data.players || {};
+    const arr     = Object.values(players);
+
+    document.getElementById('player-count').textContent = arr.length;
+    const chipList = document.getElementById('players-chip-list');
+    chipList.innerHTML = arr.length === 0
+      ? '<span class="chip-empty">Waiting for players…</span>'
+      : arr.map(p => `<div class="chip">👤 ${esc(p.name)} <span class="chip-score">${p.score||0}pt</span></div>`).join('');
+    document.getElementById('btn-start-game').disabled = arr.length === 0;
+
+    if (data.status === 'question') renderHostQuestion(data.currentQuestion, data, players);
+    if (data.status === 'revealed') renderHostReveal(data);
+    if (data.status === 'finished') renderFinalScores(players, 'host');
+  });
+}
+
+// ══ HOST START / END ══
+document.getElementById('btn-start-game').addEventListener('click', async () => {
+  await update(ref(db, 'rooms/' + currentRoomCode), { status: 'question', currentQuestion: 0 });
+  currentQIdx = 0;
+  show('screen-host-question');
+});
+document.getElementById('btn-end-lobby').addEventListener('click', async () => {
+  if (currentRoomCode) await remove(ref(db, 'rooms/' + currentRoomCode));
+  show('screen-landing');
+});
+
+// ══ HOST QUESTION RENDER ══
+function renderHostQuestion(idx, data, players) {
+  show('screen-host-question');
+  currentQIdx = idx;
+  const q = questions[idx];
+  document.getElementById('hq-num').textContent      = 'Round ' + (idx+1);
+  document.getElementById('hq-total').textContent    = questions.length;
+  document.getElementById('hq-song').textContent     = '🎵 ' + (q.songTitle || '');
+  document.getElementById('hq-prompt').textContent   = q.prompt;
+  document.getElementById('hq-correct').textContent  = q.correct;
+  document.getElementById('hq-progress').style.width = ((idx+1)/questions.length*100) + '%';
+  document.getElementById('hq-reveal-section').style.display = 'none';
+  document.getElementById('btn-reveal').disabled = false;
+  document.getElementById('btn-next').disabled   = true;
+  document.getElementById('hq-answered').textContent = '0';
+  document.getElementById('hq-total-players').textContent = Object.keys(players).length;
+
+  if (answersUnsubscribe) answersUnsubscribe();
+  answersUnsubscribe = onValue(ref(db, `rooms/${currentRoomCode}/answers/${idx}`), snap => {
+    document.getElementById('hq-answered').textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+  });
+}
+
+function renderHostReveal(data) {
+  const idx     = data.currentQuestion;
+  const q       = questions[idx];
+  const answers = data.answers?.[idx] || {};
+  const letters = ['A','B','C','D'];
+
+  document.getElementById('hq-reveal-section').style.display = 'block';
+  document.getElementById('btn-reveal').disabled = true;
+  document.getElementById('btn-next').disabled   = false;
+
+  document.getElementById('hq-choices').innerHTML = q.choices.map((c, i) => {
+    const isCorrect = c === q.correct;
+    const votes     = Object.values(answers).filter(a => a.choice === c).length;
+    return `<div class="choice-btn${isCorrect?' correct':''}" style="cursor:default">
+      <span class="choice-ltr">${letters[i]}</span>
+      <span style="flex:1">${esc(c)}</span>
+      <span class="vote-count">${votes} vote${votes!==1?'s':''}</span>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('btn-reveal').addEventListener('click', async () => {
+  const snap    = await get(ref(db, 'rooms/' + currentRoomCode));
+  const data    = snap.val();
+  const answers = data.answers?.[currentQIdx] || {};
+  const players = data.players || {};
+  const correct = questions[currentQIdx].correct;
+  const updates = { status: 'revealed', currentQuestion: currentQIdx };
+
+  for (const [pid, ans] of Object.entries(answers)) {
+    if (ans.choice === correct && players[pid]) {
+      updates[`players/${pid}/score`] = (players[pid].score || 0) + 10;
+    }
+  }
+  await update(ref(db, 'rooms/' + currentRoomCode), updates);
+});
+
+document.getElementById('btn-next').addEventListener('click', async () => {
+  const next = currentQIdx + 1;
+  if (next >= questions.length) {
+    await update(ref(db, 'rooms/' + currentRoomCode), { status: 'finished' });
+  } else {
+    currentQIdx = next;
+    await update(ref(db, 'rooms/' + currentRoomCode), { status: 'question', currentQuestion: next });
+  }
+});
+
+document.getElementById('btn-end-question').addEventListener('click', async () => {
+  if (currentRoomCode) await remove(ref(db, 'rooms/' + currentRoomCode));
+  show('screen-landing');
+});
+
+// ══ FINAL SCORES ══
+function renderFinalScores(players, who) {
+  const sorted = Object.values(players).sort((a,b) => (b.score||0)-(a.score||0));
+  const html   = sorted.map((p,i) =>
+    `<div class="score-row">
+      <div class="score-rank${i===0?' gold':''}">${i===0?'🏆':i+1}</div>
+      <div class="score-name">${esc(p.name)}${who==='player'&&p.id===myPlayerId?' <span style="color:var(--muted);font-size:11px">(you)</span>':''}</div>
+      <div class="score-pts">${p.score||0} pts</div>
+    </div>`
+  ).join('');
+  if (who === 'host') {
+    document.getElementById('host-final-scoreboard').innerHTML = html;
+    show('screen-host-final');
+  } else {
+    const me = players[myPlayerId];
+    document.getElementById('player-final-msg').textContent = `You scored ${me?me.score:0} points!`;
+    document.getElementById('player-final-scoreboard').innerHTML = html;
+    show('screen-player-final');
+  }
+}
+
+document.getElementById('btn-play-again').addEventListener('click', () => { show('screen-host-setup'); });
+document.getElementById('btn-final-home').addEventListener('click', () => show('screen-landing'));
+document.getElementById('btn-player-home').addEventListener('click', () => show('screen-landing'));
+
+// ══ PLAYER JOIN ══
+document.getElementById('join-code').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+
+document.getElementById('btn-join-room').addEventListener('click', joinRoom);
+
+async function joinRoom() {
+  const code     = document.getElementById('join-code').value.trim().toUpperCase();
+  const nickname = document.getElementById('join-nickname').value.trim();
+  const errEl    = document.getElementById('join-error');
+  errEl.style.display = 'none';
+
+  if (code.length !== 4) { errEl.textContent = 'Please enter the 4-letter room code.'; errEl.style.display='block'; return; }
+  if (!nickname)          { errEl.textContent = 'Please enter a nickname.'; errEl.style.display='block'; return; }
+
+  let snap;
+  try { snap = await get(ref(db, 'rooms/' + code)); }
+  catch(e) { errEl.textContent = 'Error: ' + e.message; errEl.style.display='block'; return; }
+  if (!snap.exists()) { errEl.textContent = '❌ Room not found — check the code and try again.'; errEl.style.display='block'; return; }
+  const data = snap.val();
+  if (data.status !== 'lobby') { errEl.textContent = '⚠️ That game has already started.'; errEl.style.display='block'; return; }
+
+  const pRef = push(ref(db, 'rooms/' + code + '/players'));
+  myPlayerId       = pRef.key;
+  myPlayerRoomCode = code;
+  myScore          = 0;
+  playerCurrentQ   = -1;
+
+  try { await set(pRef, { name: nickname, score: 0, id: myPlayerId }); }
+  catch(e) { errEl.textContent = 'Could not join: ' + e.message; errEl.style.display='block'; return; }
+
+  questions = data.questions || [];
+  document.getElementById('player-welcome-msg').textContent = `Hey ${nickname}! Room: ${code}`;
+  show('screen-player-waiting');
+  listenAsPlayer(code);
+}
+
+// ══ PLAYER LISTENER ══
+function listenAsPlayer(code) {
+  onValue(ref(db, 'rooms/' + code), snap => {
+    if (!snap.exists()) { alert('The host has ended the game.'); show('screen-landing'); return; }
+    const data    = snap.val();
+    const players = data.players || {};
+    const arr     = Object.values(players);
+
+    const lobbyChips = document.getElementById('player-lobby-chips');
+    if (lobbyChips) lobbyChips.innerHTML = arr.map(p => `<div class="chip">👤 ${esc(p.name)}</div>`).join('');
+
+    if (data.questions) questions = data.questions;
+
+    if (data.status === 'question' && data.currentQuestion !== playerCurrentQ) {
+      playerCurrentQ = data.currentQuestion;
+      renderPlayerQuestion(data.currentQuestion);
+    }
+    if (data.status === 'revealed') renderPlayerReveal(data);
+    if (data.status === 'finished') renderFinalScores(players, 'player');
+  });
+}
+
+// ══ PLAYER QUESTION ══
+let playerAnswered = false;
+
+function renderPlayerQuestion(idx) {
+  playerAnswered = false;
+  const q       = questions[idx];
+  const letters = ['A','B','C','D'];
+
+  document.getElementById('pq-num').textContent    = 'Round ' + (idx+1);
+  document.getElementById('pq-song').textContent   = '🎵 ' + (q.songTitle || '');
+  document.getElementById('pq-prompt').textContent = q.prompt;
+  document.getElementById('pq-status').style.display = 'none';
+  document.getElementById('pq-score').textContent  = 'Your score: ' + myScore + ' pts';
+
+  const grid = document.getElementById('pq-choices');
+  grid.innerHTML = '';
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-ltr">${letters[i]}</span><span>${esc(c)}</span>`;
+    btn.addEventListener('click', () => submitAnswer(c, idx));
+    grid.appendChild(btn);
+  });
+
+  show('screen-player-question');
+}
+
+async function submitAnswer(choice, qIdx) {
+  if (playerAnswered) return;
+  playerAnswered = true;
+
+  document.querySelectorAll('#pq-choices .choice-btn').forEach(b => {
+    b.disabled = true;
+    const txt = b.querySelector('span:last-child').textContent;
+    if (txt === choice) b.classList.add('selected');
+  });
+
+  try {
+    await set(ref(db, `rooms/${myPlayerRoomCode}/answers/${qIdx}/${myPlayerId}`), { choice, time: Date.now() });
+  } catch(e) { /* answer still locked locally */ }
+
+  const s = document.getElementById('pq-status');
+  s.className = 'status wait';
+  s.textContent = '✓ Answer locked in! Waiting for host to reveal…';
+  s.style.display = 'block';
+}
+
+function renderPlayerReveal(data) {
+  const idx      = data.currentQuestion;
+  const q        = questions[idx];
+  const myAnswer = data.answers?.[idx]?.[myPlayerId];
+
+  document.querySelectorAll('#pq-choices .choice-btn').forEach((b, i) => {
+    b.disabled = true;
+    const c = q.choices[i];
+    if (c === q.correct) b.classList.add('correct');
+    else if (myAnswer && c === myAnswer.choice) b.classList.add('wrong');
+  });
+
+  const me = data.players?.[myPlayerId];
+  if (me) myScore = me.score || 0;
+
+  const s = document.getElementById('pq-status');
+  s.style.display = 'block';
+  if (myAnswer && myAnswer.choice === q.correct) {
+    s.className = 'status success'; s.textContent = '🎉 Correct! +10 points';
+  } else {
+    s.className = 'status error'; s.textContent = '❌ The correct answer was: "' + q.correct + '"';
+  }
+  document.getElementById('pq-score').textContent = 'Your score: ' + myScore + ' pts';
+}
+
+// ══ UTIL ══
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+</script>
+</body>
+</html>
