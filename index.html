@@ -95,6 +95,8 @@ textarea{height:160px;resize:vertical;line-height:1.65;}
 .btn-danger:hover:not(:disabled){background:#ff6fa8;transform:translateY(-2px);}
 .btn-purple{background:#a78bfa;color:#000;}
 .btn-purple:hover:not(:disabled){background:#c4b5fd;transform:translateY(-2px);}
+.btn-orange{background:#ffaa5e;color:#000;}
+.btn-orange:hover:not(:disabled){background:#ffc080;transform:translateY(-2px);box-shadow:0 5px 20px rgba(255,170,94,.4);}
 .btn:disabled{opacity:.35;cursor:not-allowed;}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px;}
 .btn-sm{padding:8px 14px;font-size:13px;}
@@ -191,7 +193,7 @@ hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:22px 0;}
 .modal-overlay.open{display:flex;animation:fadeModal .2s ease;}
 @keyframes fadeModal{from{opacity:0}to{opacity:1}}
 .modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px;
-  width:100%;max-width:540px;position:relative;animation:riseModal .25s ease;
+  width:100%;max-width:580px;position:relative;animation:riseModal .25s ease;
   max-height:90vh;overflow-y:auto;}
 @keyframes riseModal{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 .modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);
@@ -201,16 +203,51 @@ hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:22px 0;}
 .modal-title span{color:var(--accent);}
 .modal-sub{color:var(--muted);font-size:13px;margin-bottom:24px;}
 
-.pool-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.pool-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
 .pool-tab{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border2);
   background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
-  font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;}
+  font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;min-width:80px;}
 .pool-tab:hover{color:var(--text);border-color:rgba(255,110,180,.3);}
 .pool-tab.active{background:var(--accent);color:#000;border-color:var(--accent);}
 
 .answered-bar{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px;}
 .answered-txt{font-size:12px;color:var(--muted);}
 .answered-txt strong{color:var(--accent3);}
+
+/* BULK IMPORT STYLES */
+.format-tabs{display:flex;gap:6px;margin-bottom:16px;}
+.fmt-tab{padding:7px 14px;border-radius:8px;border:1px solid var(--border2);
+  background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;
+  font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.fmt-tab:hover{color:var(--text);border-color:rgba(255,110,180,.3);}
+.fmt-tab.active{background:var(--surface3);color:var(--accent3);border-color:rgba(255,179,217,.3);}
+
+.format-hint{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;
+  padding:14px 16px;margin-bottom:16px;font-size:12px;line-height:1.7;color:var(--muted);}
+.format-hint code{background:rgba(255,110,180,.1);color:var(--accent3);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:11px;}
+.format-hint pre{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.06);border-radius:8px;
+  padding:10px 12px;margin-top:8px;overflow-x:auto;font-size:11px;color:var(--accent3);font-family:monospace;line-height:1.65;}
+
+.import-preview{margin-top:14px;}
+.import-preview-title{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:8px;}
+.preview-song-row{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;
+  padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.preview-song-name{font-size:13px;font-weight:500;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.preview-song-lines{font-size:11px;color:var(--muted);flex-shrink:0;}
+.preview-song-warn{font-size:11px;color:var(--accent2);flex-shrink:0;}
+
+.drop-zone{border:2px dashed rgba(255,110,180,.3);border-radius:12px;padding:32px 20px;
+  text-align:center;cursor:pointer;transition:all .2s;margin-bottom:16px;position:relative;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(255,110,180,.05);}
+.drop-zone-icon{font-size:28px;display:block;margin-bottom:8px;}
+.drop-zone-text{font-size:13px;color:var(--muted);}
+.drop-zone-text strong{color:var(--text);}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+
+.import-progress{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-top:10px;display:none;}
+.import-progress-bar-wrap{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin:8px 0;}
+.import-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;width:0%;}
+.import-progress-label{font-size:12px;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -396,6 +433,7 @@ hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:22px 0;}
     <div class="pool-tabs">
       <button class="pool-tab active" id="tab-view">🎵 View Songs</button>
       <button class="pool-tab" id="tab-add">➕ Add Song</button>
+      <button class="pool-tab" id="tab-bulk">📦 Bulk Import</button>
     </div>
 
     <!-- VIEW SONGS PANEL -->
@@ -416,6 +454,93 @@ hr{border:none;border-top:1px solid rgba(255,255,255,.06);margin:22px 0;}
       </div>
       <div class="status error" id="pool-error" style="display:none;margin-top:10px"></div>
     </div>
+
+    <!-- BULK IMPORT PANEL -->
+    <div id="pool-panel-bulk" style="display:none">
+
+      <!-- Format selector -->
+      <div class="format-tabs">
+        <button class="fmt-tab active" id="fmt-text">📝 Text Format</button>
+        <button class="fmt-tab" id="fmt-json">{ } JSON Format</button>
+        <button class="fmt-tab" id="fmt-file">📁 Upload File</button>
+      </div>
+
+      <!-- Text format hint -->
+      <div class="format-hint" id="hint-text">
+        Paste multiple songs using this format — separate songs with a blank line after the <code>---</code> divider:
+        <pre>Song Title Here
+Is this the real life?
+Is this just fantasy?
+Caught in a landslide
+No escape from reality
+---
+
+Another Song Title
+First line of the song
+Second line here
+Third line here
+---</pre>
+        Each song needs a title on the first line, then lyrics (one per line), then <code>---</code> to end.
+      </div>
+
+      <!-- JSON format hint -->
+      <div class="format-hint" id="hint-json" style="display:none">
+        Paste a JSON array of song objects:
+        <pre>[
+  {
+    "title": "Song Name",
+    "lines": [
+      "First lyric line",
+      "Second lyric line",
+      "Third lyric line"
+    ]
+  },
+  {
+    "title": "Another Song",
+    "lines": ["Line one", "Line two", "Line three"]
+  }
+]</pre>
+      </div>
+
+      <!-- File upload -->
+      <div id="bulk-file-zone" style="display:none">
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="bulk-file-input" accept=".txt,.json">
+          <span class="drop-zone-icon">📂</span>
+          <div class="drop-zone-text"><strong>Drop a file here</strong> or click to browse<br>
+            <span style="font-size:11px;margin-top:4px;display:block">Supports .txt (text format) and .json files</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paste area (text + json) -->
+      <div id="bulk-paste-area">
+        <label id="bulk-paste-label">Paste your songs here</label>
+        <textarea id="bulk-input" style="height:200px;font-family:monospace;font-size:12px;" placeholder="Paste songs here…"></textarea>
+      </div>
+
+      <!-- Preview -->
+      <div class="import-preview" id="bulk-preview" style="display:none">
+        <div class="import-preview-title">Preview — <span id="preview-count">0</span> songs detected</div>
+        <div id="preview-list"></div>
+      </div>
+
+      <!-- Progress -->
+      <div class="import-progress" id="import-progress">
+        <div class="import-progress-label" id="import-progress-label">Importing…</div>
+        <div class="import-progress-bar-wrap">
+          <div class="import-progress-bar" id="import-progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="status error" id="bulk-error" style="display:none;margin-top:10px"></div>
+
+      <div class="btn-row" style="margin-top:4px">
+        <button class="btn btn-orange" id="btn-preview-bulk">🔍 Preview</button>
+        <button class="btn btn-primary" id="btn-import-bulk" disabled>⬆️ Import All</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -425,7 +550,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getDatabase, ref, set, get, push, onValue, update, remove }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyCP1TrBa7I_uf1ResqBedplF6OWJE6H7pM",
   authDomain: "finishthatlyricalie.firebaseapp.com",
@@ -437,7 +561,6 @@ const firebaseConfig = {
   measurementId: "G-9NW77PS7EM"
 };
 
-// INIT
 let db;
 const banner     = document.getElementById('fb-banner');
 const bannerText = document.getElementById('fb-banner-text');
@@ -453,14 +576,12 @@ try {
 }
 document.getElementById('fb-banner-close').addEventListener('click', () => { banner.style.display = 'none'; });
 
-// SCREEN HELPER
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
 }
 
-// STATE
 let currentRoomCode  = null;
 let questions        = [];
 let currentQIdx      = 0;
@@ -477,20 +598,22 @@ document.getElementById('btn-go-host').addEventListener('click', () => {
   show('screen-host-setup');
 });
 document.getElementById('btn-go-player').addEventListener('click', () => show('screen-player-join'));
-
-// ══ BACK BUTTONS ══
 document.getElementById('btn-back-setup').addEventListener('click', () => show('screen-landing'));
 document.getElementById('btn-back-join').addEventListener('click',  () => show('screen-landing'));
 
 // ══ SONG POOL MODAL ══
+function switchPoolTab(tabName) {
+  ['view','add','bulk'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tabName);
+    document.getElementById('pool-panel-'+t).style.display = t===tabName ? 'block' : 'none';
+  });
+  if (tabName === 'view') loadPoolSongs();
+  if (tabName === 'bulk') resetBulkImport();
+}
+
 document.getElementById('btn-open-pool').addEventListener('click', () => {
   document.getElementById('modal-pool').classList.add('open');
-  // Always open on the View tab
-  document.getElementById('tab-view').classList.add('active');
-  document.getElementById('tab-add').classList.remove('active');
-  document.getElementById('pool-panel-view').style.display = 'block';
-  document.getElementById('pool-panel-add').style.display = 'none';
-  loadPoolSongs();
+  switchPoolTab('view');
 });
 document.getElementById('modal-pool-close').addEventListener('click', () => {
   document.getElementById('modal-pool').classList.remove('open');
@@ -500,20 +623,11 @@ document.getElementById('modal-pool').addEventListener('click', e => {
     document.getElementById('modal-pool').classList.remove('open');
 });
 
-// TABS
-document.getElementById('tab-view').addEventListener('click', () => {
-  document.getElementById('tab-view').classList.add('active');
-  document.getElementById('tab-add').classList.remove('active');
-  document.getElementById('pool-panel-view').style.display = 'block';
-  document.getElementById('pool-panel-add').style.display = 'none';
-});
-document.getElementById('tab-add').addEventListener('click', () => {
-  document.getElementById('tab-add').classList.add('active');
-  document.getElementById('tab-view').classList.remove('active');
-  document.getElementById('pool-panel-add').style.display = 'block';
-  document.getElementById('pool-panel-view').style.display = 'none';
-});
+document.getElementById('tab-view').addEventListener('click', () => switchPoolTab('view'));
+document.getElementById('tab-add').addEventListener('click',  () => switchPoolTab('add'));
+document.getElementById('tab-bulk').addEventListener('click', () => switchPoolTab('bulk'));
 
+// ══ ADD SINGLE SONG ══
 document.getElementById('btn-save-song').addEventListener('click', saveSong);
 
 async function saveSong() {
@@ -529,12 +643,7 @@ async function saveSong() {
     await push(ref(db, 'songPool'), { title, lines });
     document.getElementById('pool-title').value  = '';
     document.getElementById('pool-lyrics').value = '';
-    // Switch back to view tab to see the newly added song
-    document.getElementById('tab-view').classList.add('active');
-    document.getElementById('tab-add').classList.remove('active');
-    document.getElementById('pool-panel-view').style.display = 'block';
-    document.getElementById('pool-panel-add').style.display = 'none';
-    loadPoolSongs();
+    switchPoolTab('view');
   } catch(e) {
     errEl.textContent = 'Save failed: ' + e.message;
     errEl.style.display = 'block';
@@ -576,15 +685,213 @@ async function loadPoolSongs() {
   } catch(e) {
     container.innerHTML = `
       <div class="status error">
-        <strong>Could not load songs.</strong><br>
-        ${esc(e.message)}<br><br>
-        <span style="font-size:12px">Make sure your Firebase Realtime Database rules allow read/write.<br>
-        In Firebase Console → Realtime Database → Rules, set:<br>
-        <code style="background:rgba(0,0,0,.3);padding:4px 8px;border-radius:4px;display:inline-block;margin-top:6px">{ "rules": { ".read": true, ".write": true } }</code></span>
+        <strong>Could not load songs.</strong><br>${esc(e.message)}<br><br>
+        <span style="font-size:12px">Check Firebase Realtime Database rules allow read/write.</span>
       </div>`;
   }
 }
 
+// ══ BULK IMPORT ══
+let currentBulkFormat = 'text';
+let parsedBulkSongs   = [];
+
+function resetBulkImport() {
+  currentBulkFormat = 'text';
+  parsedBulkSongs   = [];
+  setFmtTab('text');
+  document.getElementById('bulk-input').value = '';
+  document.getElementById('bulk-preview').style.display = 'none';
+  document.getElementById('bulk-error').style.display = 'none';
+  document.getElementById('btn-import-bulk').disabled = true;
+  document.getElementById('import-progress').style.display = 'none';
+}
+
+function setFmtTab(fmt) {
+  currentBulkFormat = fmt;
+  ['text','json','file'].forEach(f => {
+    document.getElementById('fmt-'+f).classList.toggle('active', f===fmt);
+    const hint = document.getElementById('hint-'+f);
+    if (hint) hint.style.display = f===fmt ? 'block' : 'none';
+  });
+  document.getElementById('bulk-file-zone').style.display  = fmt==='file'  ? 'block' : 'none';
+  document.getElementById('bulk-paste-area').style.display = fmt!=='file'  ? 'block' : 'none';
+  document.getElementById('bulk-preview').style.display = 'none';
+  document.getElementById('btn-import-bulk').disabled = true;
+  parsedBulkSongs = [];
+}
+
+document.getElementById('fmt-text').addEventListener('click', () => setFmtTab('text'));
+document.getElementById('fmt-json').addEventListener('click', () => setFmtTab('json'));
+document.getElementById('fmt-file').addEventListener('click', () => setFmtTab('file'));
+
+// Drag & drop file
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFileLoad(file);
+});
+document.getElementById('bulk-file-input').addEventListener('change', e => {
+  if (e.target.files[0]) handleFileLoad(e.target.files[0]);
+});
+
+function handleFileLoad(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const content = ev.target.result;
+    const fmt = file.name.endsWith('.json') ? 'json' : 'text';
+    // Temporarily put content into a hidden variable and parse
+    const songs = fmt === 'json' ? parseJSON(content) : parseText(content);
+    showBulkPreview(songs);
+  };
+  reader.readAsText(file);
+}
+
+// PARSE TEXT FORMAT
+function parseText(raw) {
+  const songs = [];
+  // Split on --- delimiter
+  const blocks = raw.split(/^---\s*$/m);
+  for (const block of blocks) {
+    const lines = block.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length < 2) continue;
+    const title = lines[0];
+    const lyrics = lines.slice(1);
+    songs.push({ title, lines: lyrics });
+  }
+  return songs;
+}
+
+// PARSE JSON FORMAT
+function parseJSON(raw) {
+  try {
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data)) {
+      // Maybe it's a single object
+      if (data.title && data.lines) return [data];
+      return null;
+    }
+    return data.filter(s => s && s.title && Array.isArray(s.lines) && s.lines.length > 0);
+  } catch(e) {
+    return null;
+  }
+}
+
+document.getElementById('btn-preview-bulk').addEventListener('click', () => {
+  const errEl = document.getElementById('bulk-error');
+  errEl.style.display = 'none';
+
+  let songs;
+  if (currentBulkFormat === 'file') {
+    // Already handled via file reader — parsedBulkSongs may be set
+    if (parsedBulkSongs.length === 0) {
+      errEl.textContent = 'Please upload a file first.';
+      errEl.style.display = 'block';
+      return;
+    }
+    showBulkPreview(parsedBulkSongs);
+    return;
+  }
+
+  const raw = document.getElementById('bulk-input').value.trim();
+  if (!raw) { errEl.textContent = 'Please paste some content first.'; errEl.style.display='block'; return; }
+
+  songs = currentBulkFormat === 'json' ? parseJSON(raw) : parseText(raw);
+
+  if (!songs || songs.length === 0) {
+    errEl.textContent = currentBulkFormat === 'json'
+      ? 'Could not parse JSON. Make sure it\'s a valid JSON array of {title, lines} objects.'
+      : 'No songs found. Make sure each song block ends with --- on its own line.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  showBulkPreview(songs);
+});
+
+function showBulkPreview(songs) {
+  parsedBulkSongs = songs;
+  const errEl = document.getElementById('bulk-error');
+  errEl.style.display = 'none';
+
+  const valid   = songs.filter(s => s.lines && s.lines.length >= 6);
+  const invalid = songs.filter(s => !s.lines || s.lines.length < 6);
+
+  document.getElementById('preview-count').textContent = songs.length;
+  const list = document.getElementById('preview-list');
+  list.innerHTML = '';
+
+  songs.forEach(s => {
+    const isValid = s.lines && s.lines.length >= 6;
+    const row = document.createElement('div');
+    row.className = 'preview-song-row';
+    row.innerHTML = `
+      <div class="preview-song-name">${isValid ? '✅' : '⚠️'} ${esc(s.title || '(no title)')}</div>
+      ${isValid
+        ? `<div class="preview-song-lines">${s.lines.length} lines</div>`
+        : `<div class="preview-song-warn">Too few lines (${(s.lines||[]).length}/6 min)</div>`
+      }`;
+    list.appendChild(row);
+  });
+
+  document.getElementById('bulk-preview').style.display = 'block';
+  document.getElementById('btn-import-bulk').disabled = valid.length === 0;
+
+  if (invalid.length > 0) {
+    errEl.textContent = `⚠️ ${invalid.length} song(s) will be skipped (need at least 6 lyric lines each).`;
+    errEl.style.display = 'block';
+  }
+}
+
+document.getElementById('btn-import-bulk').addEventListener('click', importBulk);
+
+async function importBulk() {
+  const valid = parsedBulkSongs.filter(s => s.lines && s.lines.length >= 6);
+  if (valid.length === 0) return;
+
+  const progressEl  = document.getElementById('import-progress');
+  const progressBar = document.getElementById('import-progress-bar');
+  const progressLbl = document.getElementById('import-progress-label');
+  const importBtn   = document.getElementById('btn-import-bulk');
+  const previewBtn  = document.getElementById('btn-preview-bulk');
+
+  importBtn.disabled  = true;
+  previewBtn.disabled = true;
+  progressEl.style.display = 'block';
+
+  let done = 0;
+  let failed = 0;
+
+  for (const song of valid) {
+    try {
+      await push(ref(db, 'songPool'), {
+        title: song.title.trim(),
+        lines: song.lines.map(l => l.trim()).filter(l => l)
+      });
+      done++;
+    } catch(e) {
+      failed++;
+    }
+    const pct = Math.round((done + failed) / valid.length * 100);
+    progressBar.style.width = pct + '%';
+    progressLbl.textContent = `Importing… ${done + failed} / ${valid.length}`;
+  }
+
+  progressLbl.textContent = failed === 0
+    ? `✅ Done! ${done} song${done!==1?'s':''} imported successfully.`
+    : `⚠️ Imported ${done} songs, ${failed} failed.`;
+  progressBar.style.background = failed > 0 ? 'var(--accent2)' : 'var(--accent3)';
+
+  previewBtn.disabled = false;
+  parsedBulkSongs = [];
+  document.getElementById('bulk-input').value = '';
+  document.getElementById('bulk-preview').style.display = 'none';
+
+  // Switch to view after a moment
+  setTimeout(() => { switchPoolTab('view'); }, 2000);
+}
 
 // ══ CREATE ROOM ══
 document.getElementById('btn-create-room').addEventListener('click', createRoom);
@@ -605,8 +912,6 @@ async function createRoom() {
 
   const songs = snap.val();
   const keys  = Object.keys(songs);
-
-  // Build one question per song, each from a random spot in that song
   questions = buildRounds(songs, keys);
   if (questions.length < 1) { alert('Not enough lyric lines in the pool. Add more lines to your songs.'); return; }
 
@@ -635,54 +940,41 @@ function makeCode() {
   return Array.from({length:4}, () => c[Math.floor(Math.random()*c.length)]).join('');
 }
 
-// ══ BUILD ROUNDS — one question per song, random position, 2-line prompt ══
 function buildRounds(songs, keys) {
   const qs = [];
-  // Shuffle the song order so rounds are in a random sequence
   const shuffledKeys = shuffle(keys);
   for (const key of shuffledKeys) {
     const song  = songs[key];
     const lines = song.lines;
-    if (!lines || lines.length < 4) continue; // need at least 4 lines for wrongs
-
-    // Pick a random starting position where we have line[i], line[i+1] as prompt and line[i+2] as answer
+    if (!lines || lines.length < 4) continue;
     const validStarts = [];
     for (let i = 0; i <= lines.length - 3; i++) validStarts.push(i);
     if (validStarts.length === 0) continue;
-
     const i       = validStarts[Math.floor(Math.random() * validStarts.length)];
     const prompt  = lines[i] + '\n' + lines[i + 1];
     const correct = lines[i + 2];
-
-    // Wrong answers: other lines from the same song (not the correct one, not the prompt lines)
-    const pool   = lines.filter((l, idx) => idx !== i && idx !== i+1 && idx !== i+2 && l !== correct);
+    const pool    = lines.filter((l, idx) => idx !== i && idx !== i+1 && idx !== i+2 && l !== correct);
     if (pool.length < 3) continue;
     const wrongs  = shuffle(pool).slice(0, 3);
     const choices = shuffle([correct, ...wrongs]);
-
     qs.push({ songTitle: song.title, prompt, correct, choices });
   }
   return qs;
 }
 function shuffle(a) { return [...a].sort(() => Math.random() - 0.5); }
 
-// ══ QR CODE ══
 let qrInstance = null;
 function drawQR(code) {
   const el = document.getElementById('qr-code');
   el.innerHTML = '';
   const joinUrl = window.location.href.split('?')[0] + '?join=' + code;
   qrInstance = new QRCode(el, {
-    text: joinUrl,
-    width: 108,
-    height: 108,
-    colorDark: '#000000',
-    colorLight: '#ffffff',
+    text: joinUrl, width: 108, height: 108,
+    colorDark: '#000000', colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.M
   });
 }
 
-// ══ ROOM LISTENER ══
 function attachRoomListener(code) {
   if (roomUnsubscribe) roomUnsubscribe();
   roomUnsubscribe = onValue(ref(db, 'rooms/' + code), snap => {
@@ -704,7 +996,6 @@ function attachRoomListener(code) {
   });
 }
 
-// ══ HOST START / END ══
 document.getElementById('btn-start-game').addEventListener('click', async () => {
   await update(ref(db, 'rooms/' + currentRoomCode), { status: 'question', currentQuestion: 0 });
   currentQIdx = 0;
@@ -715,7 +1006,6 @@ document.getElementById('btn-end-lobby').addEventListener('click', async () => {
   show('screen-landing');
 });
 
-// ══ HOST QUESTION RENDER ══
 function renderHostQuestion(idx, data, players) {
   show('screen-host-question');
   currentQIdx = idx;
@@ -790,7 +1080,6 @@ document.getElementById('btn-end-question').addEventListener('click', async () =
   show('screen-landing');
 });
 
-// ══ FINAL SCORES ══
 function renderFinalScores(players, who) {
   const sorted = Object.values(players).sort((a,b) => (b.score||0)-(a.score||0));
   const html   = sorted.map((p,i) =>
@@ -817,7 +1106,6 @@ document.getElementById('btn-player-home').addEventListener('click', () => show(
 
 // ══ PLAYER JOIN ══
 document.getElementById('join-code').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-
 document.getElementById('btn-join-room').addEventListener('click', joinRoom);
 
 async function joinRoom() {
@@ -851,7 +1139,6 @@ async function joinRoom() {
   listenAsPlayer(code);
 }
 
-// ══ PLAYER LISTENER ══
 function listenAsPlayer(code) {
   onValue(ref(db, 'rooms/' + code), snap => {
     if (!snap.exists()) { alert('The host has ended the game.'); show('screen-landing'); return; }
@@ -873,7 +1160,6 @@ function listenAsPlayer(code) {
   });
 }
 
-// ══ PLAYER QUESTION ══
 let playerAnswered = false;
 
 function renderPlayerQuestion(idx) {
@@ -945,7 +1231,6 @@ function renderPlayerReveal(data) {
   document.getElementById('pq-score').textContent = 'Your score: ' + myScore + ' pts';
 }
 
-// ══ UTIL ══
 function esc(str) {
   return String(str)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
